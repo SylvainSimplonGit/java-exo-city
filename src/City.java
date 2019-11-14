@@ -1,5 +1,4 @@
 import java.util.Collection;
-import java.util.HashSet;
 
 public class City {
     private final int RADIUS_EARTH = 6371;
@@ -55,8 +54,7 @@ public class City {
         return RADIUS_EARTH * Math.acos(Math.cos(latitudePointRad) * Math.cos(latitudeCityRad) * Math.cos(longitudeCityRad - longitudePointRad) + Math.sin(latitudePointRad) * Math.sin(latitudeCityRad));
     }
 
-    // ToDo surcharger la méthode getDistance
-    double getDistanceBetweenTwoCity(City otherCity) {
+    double getDistance(City otherCity) {
         return getDistance(otherCity.latitude, otherCity.longitude);
     }
 
@@ -68,7 +66,7 @@ public class City {
 
         if (!cities.isEmpty()) {
             for(City city : cities) {
-                double distCity = getDistanceBetweenTwoCity(city);
+                double distCity = getDistance(city);
                 if (distOfNearestCity == 0 || distCity < distOfNearestCity) {
                     nearestCity = city;
                     distOfNearestCity = distCity;

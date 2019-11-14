@@ -1,5 +1,3 @@
-import org.w3c.dom.ls.LSOutput;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -136,7 +134,7 @@ public class Main {
                 System.out.println("Ville 1 : " + city1.toString());
                 System.out.println("Ville 2 : " + city2.toString());
 
-                System.out.println("La distance entre " + city1.getName() + " et " + city2.getName() + " est de : " + city1.getDistanceBetweenTwoCity(city2) + " kms");
+                System.out.println("La distance entre " + city1.getName() + " et " + city2.getName() + " est de : " + city1.getDistance(city2) + " kms");
             }
         }
     }
