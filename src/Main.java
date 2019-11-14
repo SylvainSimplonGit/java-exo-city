@@ -1,20 +1,27 @@
+import org.w3c.dom.ls.LSOutput;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 
 public class Main {
 
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     private final static Map<String, String> mainMenuChoices = new HashMap<>();
     private final static Scanner inputScanner = new Scanner(System.in);
     private final static HashSet<City> cities = new HashSet<>();
-    private static int index = 0;
+//    private static int index = 0;
 
 
+    /**
+     * Entry point of program
+     * @param args file containing the list of common CSV format
+     */
     public static void main(String[] args) {
+
         // Load menus
-        initDatas();
+        initDatas(args[0]);
 
         // Load menus
         initMenus();
@@ -49,13 +56,20 @@ public class Main {
         inputScanner.close();
     }
 
-    private static void initDatas() {
-        loadCitiesFromFile(Path.of("resources\\Communes.csv"));
+    /**
+     * Initialise data needed in program
+     * @param filePath file path of csv file
+     */
+    private static void initDatas(String filePath) {
+        loadCitiesFromFile(Path.of(filePath));
 
         if (DEBUG)
             System.out.println("Importation réussie !");
     }
 
+    /**
+     * Load menus in a menu choices HashMap
+     */
     private static void initMenus() {
         mainMenuChoices.put("1", "Calculer la distance d'une commune à un point quelconque repéré par ses latitude et longitude");
         mainMenuChoices.put("2", "Calculer la distance d'une commune à une autre commune");
@@ -65,6 +79,11 @@ public class Main {
         mainMenuChoices.put("6", "Quitter le programme");
     }
 
+    /**
+     * Shows a menu based on a list of choices given as parameter in a map and gets the user choice.
+     * @param menuPossibleChoiceMap the list of possible choices.
+     * @return the actual choice made by the user.
+     */
     private static String showMenu(Map<String, String> menuPossibleChoiceMap) {
         ArrayList<String> menuPossibleChoiceList = new ArrayList<>();
         System.out.println("----------- Statistiques sur les villes ----------");
@@ -80,6 +99,11 @@ public class Main {
         return getUserChoice(menuPossibleChoiceList);
     }
 
+    /**
+     * Gets a user choice based on a list of possible choices.
+     * @param possibleValues the possible values to check against.
+     * @return the user choice.
+     */
     private static String getUserChoice(List<String> possibleValues) {
         String userChoice;
         do {
@@ -90,14 +114,20 @@ public class Main {
         return userChoice;
     }
 
+    /**
+     * Display the distance between a city and a point.
+     */
     private static void displayDistanceWithPoint() {
         City city = getCityChoice("la ville ");
-        Float latitude = getCoordChoice("Latitude");
-        Float longitude = getCoordChoice("Longitude");
+        Float latitude = getCoordinateChoice("Latitude");
+        Float longitude = getCoordinateChoice("Longitude");
 
         System.out.println("La distance entre " + city.getName() + " et le point " + latitude + "," + longitude + " est de :" + city.getDistance(latitude, longitude) + " kms");
     }
 
+    /**
+     * Display the distance between two cities.
+     */
     private static void displayDistanceBetweenTwoCities() {
         City city1 = getCityChoice("la 1ère ville ");
         if (city1 != null) {
@@ -111,12 +141,14 @@ public class Main {
         }
     }
 
+    /**
+     * Display the city nearest of a list of cities.
+     */
     private static void displayCityNearestOfList() {
         // Cities of test
         City cityChosen = getCityChoice("la ville à partir de laquelle la recherche se fera ");
 
         // list of cities
-        // ToDo récupérer une liste de villes saisies par l'utilisateur
         City cityAdded = null;
         HashSet<City> citiesAdded = new HashSet<>();
 
@@ -130,9 +162,13 @@ public class Main {
         System.out.println("La ville la plus proche de " + cityChosen.getName() + " est : " + cityNearest.getName());
     }
 
+    /**
+     * Display the cities in a circle defined by a point (latitude, longitude)
+     * and a radius.
+     */
     private static void displayCitiesInRadius() {
-        Float latitude = getCoordChoice("Latitude ");
-        Float longitude = getCoordChoice("Longitude ");
+        Float latitude = getCoordinateChoice("Latitude ");
+        Float longitude = getCoordinateChoice("Longitude ");
         Float radius = getRadiusChoice("rayon ");
 
         HashSet<City> citiesInRadius = getCitiesInCircle(radius, cities, latitude, longitude);
@@ -142,6 +178,10 @@ public class Main {
         }
     }
 
+    /**
+     * Display cities in the intersection of several circles defined
+     * by a point (latitude, longitude) and a radius.
+     */
     private static void displayCitiesInIntersect() {
         int numberCircle = 0;
 
@@ -153,8 +193,8 @@ public class Main {
         HashSet<City> intersection = null;
 
         for (int i = 0; i != numberCircle; i++) {
-            Float latitude = getCoordChoice("Latitude du centre " + (i + 1) + " ");
-            Float longitude = getCoordChoice("Longitude du centre " + (i + 1) + " ");
+            Float latitude = getCoordinateChoice("Latitude du centre " + (i + 1) + " ");
+            Float longitude = getCoordinateChoice("Longitude du centre " + (i + 1) + " ");
             Float radius = getRadiusChoice("rayon du centre " + (i + 1) + " ");
 
             HashSet<City> currentCities = getCitiesInCircle(radius, cities, latitude, longitude);
@@ -172,11 +212,19 @@ public class Main {
         }
     }
 
-    private static HashSet<City> getCitiesInCircle(float rayon, HashSet<City> cities, double pointLatitude, double pointLongitude) {
+    /**
+     * Gets cities in a circle defined by a point (latitude, longitude) and a radius.
+     * @param radius radius of the research circle.
+     * @param cities hash set list of cities to check.
+     * @param pointLatitude latitude of circle center in degrees.
+     * @param pointLongitude longitude of circle center in degrees.
+     * @return a hash set of cities whose distance to the center is less than the radius
+     */
+    private static HashSet<City> getCitiesInCircle(float radius, HashSet<City> cities, double pointLatitude, double pointLongitude) {
         HashSet<City> citiesInCircle = new HashSet<>();
 
         for (City city : cities) {
-            if (city.getDistance(pointLatitude, pointLongitude) <= rayon) {
+            if (city.getDistance(pointLatitude, pointLongitude) <= radius) {
                 citiesInCircle.add(city);
             }
         }
@@ -184,16 +232,26 @@ public class Main {
         return citiesInCircle;
     }
 
-    private static Float getCoordChoice(String typeCoord) {
-        Float coordDeg;
+    /**
+     * Gets and checks a coordinate in degrees.
+     * @param message display message to clarify the requested entry.
+     * @return a coordinate checked.
+     */
+    private static Float getCoordinateChoice(String message) {
+        Float coordinateDeg;
         inputScanner.useLocale(Locale.US);
         do {
-            System.out.println("Veuillez entrer la " + typeCoord.toLowerCase() + "(en degré) : ");
-            coordDeg = inputScanner.nextFloat();
-        } while (coordDeg < 0.0f && coordDeg > 360.0f);
-        return coordDeg;
+            System.out.println("Veuillez entrer la " + message.toLowerCase() + "(en degré) : ");
+            coordinateDeg = inputScanner.nextFloat();
+        } while (coordinateDeg < 0.0f && coordinateDeg > 360.0f);
+        return coordinateDeg;
     }
 
+    /**
+     * Gets and checks a radius positive.
+     * @param message display message to clarify the requested entry.
+     * @return a raduis checked.
+     */
     private static Float getRadiusChoice(String message) {
         Float inputValue;
         inputScanner.useLocale(Locale.US);
@@ -204,6 +262,11 @@ public class Main {
         return inputValue;
     }
 
+    /**
+     * Gets and checked a city in hash set of cities.
+     * @param message display message to clarify the requested entry.
+     * @return a city checked
+     */
     private static City getCityChoice(String message) {
         String nameCity = "";
         ArrayList<City> citiesNamed;
@@ -231,7 +294,11 @@ public class Main {
                         System.out.println("Quelle ville choisissez-vous : ");
                         indexCity = inputScanner.nextInt();
                         inputScanner.nextLine();
-                        cityChosen = citiesNamed.get(indexCity);
+                        if (indexCity < citiesNamed.size()) {
+                            cityChosen = citiesNamed.get(indexCity);
+                        } else {
+                            System.out.println("le choix " + indexCity + " n'est pas possible !");
+                        }
                     } while (indexCity < 0 || indexCity >= citiesNamed.size());
                 }
             }
@@ -241,27 +308,46 @@ public class Main {
         return cityChosen;
     }
 
+    /**
+     * Loads data from a CSV file in hash set, excluding duplicate and non-compliant data.
+     * @param filePath Path to the CSV file contains datas.
+     */
     private static void loadCitiesFromFile(Path filePath) {
-        // ToDo Chalons-sur-Saône doublons
+        int index = 0;
+        int indexNbLine = 0;
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filePath.toFile()));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(Path.of("resources\\Extract.csv").toFile()));
+            BufferedWriter writerOK = null;
+            BufferedWriter writerKO = null;
+            if (DEBUG) {
+                writerOK = new BufferedWriter(new FileWriter(Path.of("resources\\Extract.csv").toFile()));
+                writerKO = new BufferedWriter(new FileWriter(Path.of("resources\\Extract-ko.csv").toFile()));
+            }
+
             String line;
 
             do {
                 line = reader.readLine();
+                indexNbLine++;
                 try {
-                    String[] datas = line.split(";");
-                    String cityName = datas[0];
-                    float cityLatitude = Float.parseFloat(datas[1]);
-                    float cityLongitude = Float.parseFloat(datas[2]);
-                    addCity(new City(cityName, cityLatitude, cityLongitude));
-                    if (DEBUG)
-                        writer.write(line + "\n");
+                    String[] dataCSV = line.split(";");
+                    String cityName = dataCSV[0];
+                    float cityLatitude = Float.parseFloat(dataCSV[1]);
+                    float cityLongitude = Float.parseFloat(dataCSV[2]);
+                    if (addCity(new City(cityName, cityLatitude, cityLongitude)) && DEBUG) {
+                        index++;
+                        writerOK.write(line + "\n");
+                    } else {
+                        assert writerKO != null;
+                        writerKO.write("Doublon;" + line + "\n");
+                    }
+
                 } catch (Exception ignored) {
-                    if (DEBUG)
-                        System.out.println("Problème sur la ligne : " + line);
+                    if (DEBUG) {
+                        writerKO.write("Format;"+ line + "\n");
+//                        System.out.println("Problème sur la ligne : " + line);
+                    }
                 }
 
             } while (line != null);
@@ -270,14 +356,24 @@ public class Main {
             System.err.println("Une erreur est survenue lors de la lecture du fichier : " + filePath);
         }
         if (DEBUG)
+            System.out.println("Lecture de " + index + " lignes");
             System.out.println("Importation de " + index + " lignes");
     }
 
-    private static void addCity(City city) {
-        if (cities.add(city))
-            index++;
+    /**
+     * Adds city in hash set cities.
+     * @param city a city object to add.
+     * @return a list of cities which have the same name.
+     */
+    private static boolean addCity(City city) {
+        return cities.add(city);
     }
 
+    /**
+     * Gets a list of cities which have the same name but different coordinates.
+     * @param name the city name to search.
+     * @return a list of cities which have the same name.
+     */
     private static ArrayList<City> getListOfCitiesNamed(String name) {
         ArrayList<City> citiesNamed = new ArrayList<>();
         for (City city : cities) {
