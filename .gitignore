@@ -1,4 +1,6 @@
 .idea
 out
 resources/*.java
+resources/Extract.csv
+resources/Extract-ko.csv
 *.iml
