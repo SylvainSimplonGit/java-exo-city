@@ -1,3 +1,4 @@
+import java.util.Collection;
 import java.util.HashSet;
 
 public class City {
@@ -54,35 +55,28 @@ public class City {
         return RADIUS_EARTH * Math.acos(Math.cos(latitudePointRad) * Math.cos(latitudeCityRad) * Math.cos(longitudeCityRad - longitudePointRad) + Math.sin(latitudePointRad) * Math.sin(latitudeCityRad));
     }
 
+    // ToDo surcharger la méthode getDistance
     double getDistanceBetweenTwoCity(City otherCity) {
         return getDistance(otherCity.latitude, otherCity.longitude);
     }
 
-    City getNearestCity(HashSet<City> cities) {
+    // ToDo voir Javadoc Optional<City>
+    // Optional<City> getNearestCity(Collection<City> cities)
+    City getNearestCity(Collection<City> cities) {
         City nearestCity = null;
         double distOfNearestCity = 0;
 
-        for(City city : cities) {
-            double distCity = getDistanceBetweenTwoCity(city);
-            if (distOfNearestCity == 0 || distCity < distOfNearestCity) {
-                nearestCity = city;
-                distOfNearestCity = distCity;
+        if (!cities.isEmpty()) {
+            for(City city : cities) {
+                double distCity = getDistanceBetweenTwoCity(city);
+                if (distOfNearestCity == 0 || distCity < distOfNearestCity) {
+                    nearestCity = city;
+                    distOfNearestCity = distCity;
+                }
             }
         }
+
         return nearestCity;
     }
 
-    public HashSet<City> getCitiesInCircle(int rayon, HashSet<City> cities, double pointLatitude, double pointLongitude) {
-        HashSet<City> citiesInCircle = null;
-
-        for (City city : cities) {
-            if (city.getDistance(pointLatitude, pointLongitude) <= rayon) {
-                citiesInCircle.add(city);
-            }
-        }
-
-        return citiesInCircle;
-    }
-
-
-    }
+}
